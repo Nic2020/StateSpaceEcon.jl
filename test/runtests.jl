@@ -413,6 +413,7 @@ for sfdef = Iterators.map(QuoteNode, StateSpaceEcon.StackedTimeSolver.sf_libs)
 end
 
 include("sim_solver.jl")
+include("worldage.jl")
 
 
 include("kalman.jl")

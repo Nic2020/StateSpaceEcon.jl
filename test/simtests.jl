@@ -386,8 +386,10 @@ end
         sd = StateSpaceEcon.StackedTimeSolver.StackedTimeSolverData(m, p, fcgiven)
         @test_throws ErrorException StateSpaceEcon.StackedTimeSolver.update_plan!(sd, m, Plan(m, 3:8))
         x = rand(Float64, size(ed))
-        R1, _ = StateSpaceEcon.StackedTimeSolver.stackedtime_RJ(x, ed, sd)
-        R2 = StateSpaceEcon.StackedTimeSolver.stackedtime_R!(similar(R1), x, ed, sd)
+        # invokelatest: internal functions, called right after building the model in this
+        # same block (the public entry points cross into the latest world themselves)
+        R1, _ = Base.invokelatest(StateSpaceEcon.StackedTimeSolver.stackedtime_RJ, x, ed, sd)
+        R2 = Base.invokelatest(StateSpaceEcon.StackedTimeSolver.stackedtime_R!, similar(R1), x, ed, sd)
         @test R1 ≈ R2
     end
     let m = getE3()
@@ -412,8 +414,10 @@ end
 
         sd = StateSpaceEcon.StackedTimeSolver.StackedTimeSolverData(m, p, fcgiven)
         x = rand(Float64, size(ed))
-        R1, _ = StateSpaceEcon.StackedTimeSolver.stackedtime_RJ(x, ed, sd)
-        R2 = StateSpaceEcon.StackedTimeSolver.stackedtime_R!(similar(R1), x, ed, sd)
+        # invokelatest: internal functions, called right after building the model in this
+        # same block (the public entry points cross into the latest world themselves)
+        R1, _ = Base.invokelatest(StateSpaceEcon.StackedTimeSolver.stackedtime_RJ, x, ed, sd)
+        R2 = Base.invokelatest(StateSpaceEcon.StackedTimeSolver.stackedtime_R!, similar(R1), x, ed, sd)
         @test R1 ≈ R2
     end
     let m = getE6()
@@ -433,8 +437,10 @@ end
 
         sd = StateSpaceEcon.StackedTimeSolver.StackedTimeSolverData(m, p, fcgiven)
         x = rand(Float64, size(ed))
-        R1, _ = StateSpaceEcon.StackedTimeSolver.stackedtime_RJ(x, ed, sd)
-        R2 = StateSpaceEcon.StackedTimeSolver.stackedtime_R!(similar(R1), x, ed, sd)
+        # invokelatest: internal functions, called right after building the model in this
+        # same block (the public entry points cross into the latest world themselves)
+        R1, _ = Base.invokelatest(StateSpaceEcon.StackedTimeSolver.stackedtime_RJ, x, ed, sd)
+        R2 = Base.invokelatest(StateSpaceEcon.StackedTimeSolver.stackedtime_R!, similar(R1), x, ed, sd)
     end
 end
 

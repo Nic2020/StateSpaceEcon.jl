@@ -122,7 +122,8 @@ Set the steady state values to the provided defaults and presolve.
 Standard options (default values are taken from `model.options`)
   * `verbose`
 """
-function clear_sstate!(model::Model; lvl = 0.1, slp = 0.0, verbose = model.options.verbose)
+clear_sstate!(model::Model; kwargs...) = Base.invokelatest(_clear_sstate!, model; kwargs...)::Nothing
+function _clear_sstate!(model::Model; lvl = 0.1, slp = 0.0, verbose = model.options.verbose)
     ss = model.sstate
     nvars = length(model.variables)
     # nshks = length(model.shocks)
@@ -133,7 +134,7 @@ function clear_sstate!(model::Model; lvl = 0.1, slp = 0.0, verbose = model.optio
     return _do_update_auxvars_presolve!(model, verbose)
 end
 export clear_sstate!
-@assert precompile(clear_sstate!, (Model,))
+@assert precompile(_clear_sstate!, (Model,))
 
 """
     initial_sstate!(model, init; <options>)
@@ -156,7 +157,8 @@ Standard options (default values are taken from `model.options`)
   * `verbose`
 
 """
-function initial_sstate!(model::Model, init::AbstractVector{Float64}; verbose = model.options.verbose)
+initial_sstate!(model::Model, init::AbstractVector{Float64}; kwargs...) = Base.invokelatest(_initial_sstate!, model, init; kwargs...)::Nothing
+function _initial_sstate!(model::Model, init::AbstractVector{Float64}; verbose = model.options.verbose)
     ss = model.sstate
     nvars = length(model.variables)
     nshks = length(model.shocks)
@@ -171,6 +173,6 @@ function initial_sstate!(model::Model, init::AbstractVector{Float64}; verbose = 
     return _do_update_auxvars_presolve!(model, verbose)
 end
 export initial_sstate!
-@assert precompile(initial_sstate!, (Model, Vector{Float64}))
+@assert precompile(_initial_sstate!, (Model, Vector{Float64}))
 
 

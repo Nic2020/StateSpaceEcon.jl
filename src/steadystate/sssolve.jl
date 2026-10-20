@@ -23,7 +23,8 @@ Specific options
     method starts with the LM algorithm and automatically switches to NR when it
     starts to converge. Default is `:nr`.
 """
-function sssolve!(model::Model;
+sssolve!(model::Model; kwargs...) = Base.invokelatest(_sssolve!, model; kwargs...)::Vector{Float64}
+function _sssolve!(model::Model;
     verbose::Bool = model.options.verbose,
     tol::Float64 = model.options.tol,
     maxiter::Int64 = model.options.maxiter,
@@ -165,4 +166,4 @@ function sssolve!(model::Model;
     end
     return ss.values
 end
-@assert precompile(sssolve!, (Model,))
+@assert precompile(_sssolve!, (Model,))

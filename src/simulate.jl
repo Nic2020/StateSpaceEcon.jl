@@ -14,6 +14,12 @@
 
 const defaultsolver = :stackedtime
 
+# World age: a model's evaluation functions are created by `eval` when the model
+# is built. A caller that builds and then simulates in the same call (a function,
+# a `let` or a `@testset` block) runs in a world where those functions do not
+# exist yet. So the dispatchers below call the solver through `Base.invokelatest`,
+# once; the solvers themselves don't.
+
 #####  solve!() #####
 
 """
@@ -26,7 +32,7 @@ function solve! end
 export solve!
 
 function solve!(model::Model; solver::Symbol=defaultsolver, kwargs...)
-    return getsolvermodule(solver).solve!(model; kwargs...)
+    return Base.invokelatest(getsolvermodule(solver).solve!, model; kwargs...)
 end
 
 #####  shockdecomp() #####
@@ -61,7 +67,7 @@ export shockdecomp
 function shockdecomp(model::Model, plan::Plan, exogdata::MVTSeries;
     solver::Symbol=defaultsolver, initdecomp::Workspace=Workspace(),
     control::MVTSeries=steadystatedata(model, plan), kwargs...)
-    return getsolvermodule(solver).shockdecomp(model, plan, exogdata; control, initdecomp, kwargs...)
+    return Base.invokelatest(getsolvermodule(solver).shockdecomp, model, plan, exogdata; control, initdecomp, kwargs...)
 end
 
 #####  simulate() #####
@@ -162,7 +168,7 @@ end
 
 # this is the dispatcher -> call the appropriate solver
 simulate(m::Model, p::Plan, exog::AbstractMatrix; solver::Symbol=defaultsolver, kwargs...) =
-    getsolvermodule(solver).simulate(m, p, exog; kwargs...)
+    Base.invokelatest(getsolvermodule(solver).simulate, m, p, exog; kwargs...)
 
 # Handle the case with 2 sets of plan-data for mixture of ant and unant shocks
 function simulate(m::Model, p_ant::Plan, data_ant::SimData, p_unant::Plan, data_unant::SimData; kwargs...)
@@ -178,7 +184,7 @@ end
 simulate(m::Model, p_ant::Plan, data_ant::AbstractMatrix,
     p_unant::Plan, data_unant::AbstractMatrix;
     solver::Symbol=defaultsolver, kwargs...) =
-    getsolvermodule(solver).simulate(m, p_ant, data_ant, p_unant, data_unant; kwargs...)
+    Base.invokelatest(getsolvermodule(solver).simulate, m, p_ant, data_ant, p_unant, data_unant; kwargs...)
 
 
 #####  stoch_simulate() #####
@@ -237,7 +243,7 @@ function stoch_simulate(m::Model, p::Plan, baseline::SimData, shocks;
         throw(ArgumentError("Expected the shocks argument to be Vector or Workspace of SimData, not $(typeof(shocks))."))
     end
     ##### dispatch
-    getsolvermodule(solver).stoch_simulate(m, p, baseline[p.range], shocks; kwargs...)
+    Base.invokelatest(getsolvermodule(solver).stoch_simulate, m, p, baseline[p.range], shocks; kwargs...)
 end
 export stoch_simulate
 

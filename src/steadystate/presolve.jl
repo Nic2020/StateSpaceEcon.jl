@@ -107,11 +107,12 @@ presolve_sstate!(model::Model; kwargs...) =
     presolve_sstate!(model, model.sstate.mask, model.sstate.values; kwargs...)
 presolve_sstate!(model::Model, mask::AbstractVector{Bool}, values::AbstractVector{Float64};
     verbose = model.verbose, tol = model.tol, _1dsolver = :bisect, method = _1dsolver) =
-    _presolve_equations!(ModelBaseEcon.alleqns(model.sstate), mask, values, method, verbose, tol)
+    Base.invokelatest(_presolve_equations!, ModelBaseEcon.alleqns(model.sstate), mask, values, method, verbose, tol)::Bool
 presolve_sstate!(eqns::OrderedDict{Symbol,SteadyStateEquation}, mask::AbstractVector{Bool}, values::AbstractVector{Float64};
     verbose = false, tol = 1e-12, _1dsolver = :bisect, method = _1dsolver) =
-    _presolve_equations!(eqns, mask, values, method, verbose, tol)
+    Base.invokelatest(_presolve_equations!, eqns, mask, values, method, verbose, tol)::Bool
 
 @assert precompile(presolve_sstate!, (Model, Vector{Bool}, Vector{Float64}))
 @assert precompile(presolve_sstate!, (OrderedDict{Symbol,SteadyStateEquation}, Vector{Bool}, Vector{Float64}))
+@assert precompile(_presolve_equations!, (OrderedDict{Symbol,SteadyStateEquation}, Vector{Bool}, Vector{Float64}, Symbol, Bool, Float64))
 
