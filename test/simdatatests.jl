@@ -172,15 +172,19 @@ end
     m.sstate.y.level = 2.0
     m.sstate.y.slope = 0.1
     rng = 2020Q1:2020Q4
+    # `@test_deprecated ex` returns the value of `ex` only when deprecations warn;
+    # with --depwarn=error it tests that `ex` throws instead, so there is no value
+    deprecated_equals(f, expected) = Base.JLOptions().depwarn == 2 ?
+        (@test_deprecated f()) : (@test (@test_deprecated f()) == expected)
     expected = steadystatedata(m, Plan(m, rng))
-    @test (@test_deprecated steadystatedata(m, rng)) == expected
+    deprecated_equals(() -> steadystatedata(m, rng), expected)
     @test expected[first(rng), :y] ≈ 2.0
     ref = first(rng) + 2
-    @test (@test_deprecated steadystatedata(m, rng; ref)) == steadystatedata(m, Plan(m, rng); ref)
-    @test (@test_deprecated steadystatearray(m, rng)) == steadystatearray(m, Plan(m, rng))
+    deprecated_equals(() -> steadystatedata(m, rng; ref), steadystatedata(m, Plan(m, rng); ref))
+    deprecated_equals(() -> steadystatearray(m, rng), steadystatearray(m, Plan(m, rng)))
     # integer ranges: Plan converts them to MIT{Unit}
     for irng in (1:4, Base.OneTo(4))
-        @test (@test_deprecated steadystatedata(m, irng)) == steadystatedata(m, Plan(m, irng))
-        @test (@test_deprecated steadystatearray(m, irng)) == steadystatearray(m, Plan(m, irng))
+        deprecated_equals(() -> steadystatedata(m, irng), steadystatedata(m, Plan(m, irng)))
+        deprecated_equals(() -> steadystatearray(m, irng), steadystatearray(m, Plan(m, irng)))
     end
 end
