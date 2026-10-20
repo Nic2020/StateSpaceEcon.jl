@@ -118,7 +118,7 @@ end
 end
 
 @testset "E7A.sim" begin
-    test_simulation(getE7(), joinpath(@__DIR__, "data", "M7_TestData.csv"))
+    test_simulation(getE7A(), joinpath(@__DIR__, "data", "M7_TestData.csv"))
 end
 
 #############################################################
