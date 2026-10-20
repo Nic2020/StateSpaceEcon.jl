@@ -83,7 +83,7 @@ function diagnose_sstate(point::AbstractVector{Float64}, model::Model)
     tol = model.options.tol 
     rr, jj = global_SS_RJ(point, model)
     neqns, nvars = size(jj)
-    ff = qr([jj Matrix(I, neqns, neqns); zeros(neqns, nvars) Matrix(I, neqns, neqns)], Val(true))
+    ff = qr([jj Matrix(I, neqns, neqns); zeros(neqns, nvars) Matrix(I, neqns, neqns)], ColumnNorm())
     sol = Vector{Float64}(undef, neqns + nvars)
     rj = rank(ff.R)
     rhs = ff.Q' * vcat(rr, zeros(neqns))
