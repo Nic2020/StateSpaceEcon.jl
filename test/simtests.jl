@@ -121,6 +121,19 @@ end
     test_simulation(getE7A(), joinpath(@__DIR__, "data", "M7_TestData.csv"))
 end
 
+@testset "aux variables, SimData" begin
+    # simulating a model with auxiliary variables (substitutions) on SimData
+    # must return data with the input's columns only (failed with DimensionMismatch)
+    m = getE7()
+    @test m.nauxs > 0
+    sssolve!(m)
+    p = Plan(m, 2001Q1:2004Q4)
+    data = steadystatedata(m, p)
+    res = simulate(m, p, data)
+    @test size(res) == size(data)
+    @test isapprox(res, data; atol=1e-9)
+end
+
 #############################################################
 # linearization tests
 

@@ -166,3 +166,15 @@ end
     @test isfailed.([foo, bar, foo]) == [false, true, false]
 end
 
+@testset "steadystatedata(m, rng)" begin
+    # the deprecated range method must use the same default `ref` as the Plan method
+    m = getE1()
+    m.sstate.y.level = 2.0
+    m.sstate.y.slope = 0.1
+    rng = 2020Q1:2020Q4
+    expected = steadystatedata(m, Plan(m, rng))
+    @test (@test_deprecated steadystatedata(m, rng)) == expected
+    @test expected[first(rng), :y] ≈ 2.0
+    ref = first(rng) + 2
+    @test (@test_deprecated steadystatedata(m, rng; ref)) == steadystatedata(m, Plan(m, rng); ref)
+end
