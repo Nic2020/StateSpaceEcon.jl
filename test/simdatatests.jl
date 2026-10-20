@@ -177,4 +177,10 @@ end
     @test expected[first(rng), :y] ≈ 2.0
     ref = first(rng) + 2
     @test (@test_deprecated steadystatedata(m, rng; ref)) == steadystatedata(m, Plan(m, rng); ref)
+    @test (@test_deprecated steadystatearray(m, rng)) == steadystatearray(m, Plan(m, rng))
+    # integer ranges: Plan converts them to MIT{Unit}
+    for irng in (1:4, Base.OneTo(4))
+        @test (@test_deprecated steadystatedata(m, irng)) == steadystatedata(m, Plan(m, irng))
+        @test (@test_deprecated steadystatearray(m, irng)) == steadystatearray(m, Plan(m, irng))
+    end
 end
