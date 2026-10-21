@@ -45,32 +45,51 @@ jobs:
       - uses: julia-actions/cache@v3
 
       # Fixes to StateSpaceEcon often need unreleased fixes in TimeSeriesEcon or
-      # ModelBaseEcon. On a pull request, if the GitHub account that owns the PR
-      # branch also has a branch with the same name in TimeSeriesEcon.jl or
-      # ModelBaseEcon.jl, test against that branch. Otherwise, and on master,
-      # use the registered versions. The job summary says which was used.
+      # ModelBaseEcon. On a pull request from a branch other than master, if the
+      # GitHub account that owns the PR branch also has a branch with exactly the
+      # same name in TimeSeriesEcon.jl or ModelBaseEcon.jl, test against that
+      # branch's current commit. Otherwise use the registered versions. The job
+      # summary and a notice on the run page say which was used. Before merging
+      # StateSpaceEcon, release the siblings, delete their branches and re-run
+      # CI, so it passes with the registered versions.
       - name: Use sibling branches with the same name
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.head_ref != github.event.repository.default_branch
         shell: bash
         env:
           OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
           BRANCH: ${{ github.head_ref }}
           GIT_TERMINAL_PROMPT: "0"
         run: |
-          urls=""
+          siblings=""
           for pkg in TimeSeriesEcon ModelBaseEcon; do
             url="https://github.com/$OWNER/$pkg.jl"
-            if git ls-remote --exit-code --heads "$url" "$BRANCH" > /dev/null 2>&1; then
-              echo "- $pkg: branch \`$BRANCH\` of $url" >> "$GITHUB_STEP_SUMMARY"
-              urls="$urls $url"
+            # git ls-remote --exit-code returns 2 when the branch does not exist;
+            # a missing repository is reported as not found. Retry anything else.
+            for attempt in 1 2 3; do
+              out=$(git ls-remote --exit-code "$url" "refs/heads/$BRANCH" 2>&1) && status=0 || status=$?
+              case "$out" in
+                *"Repository not found"*|*"could not read Username"*) status=missing ;;
+              esac
+              if [ "$status" = 0 ] || [ "$status" = 2 ] || [ "$status" = missing ]; then break; fi
+              echo "git ls-remote $url failed (attempt $attempt): $out"
+              sleep 10
+            done
+            sha=$(printf '%s\n' "$out" | awk -v ref="refs/heads/$BRANCH" '$2 == ref { print $1 }')
+            if [ "$status" = 0 ] && [ -n "$sha" ]; then
+              echo "- $pkg: branch \`$BRANCH\` of $url at \`$sha\`" >> "$GITHUB_STEP_SUMMARY"
+              echo "::notice title=$pkg from a branch::Testing against $url branch $BRANCH ($sha), not the registered version"
+              siblings="$siblings $url@$sha"
+            elif [ "$status" = 0 ] || [ "$status" = 2 ] || [ "$status" = missing ]; then
+              echo "- $pkg: registered version (no branch \`$BRANCH\` in $url)" >> "$GITHUB_STEP_SUMMARY"
             else
-              echo "- $pkg: registered version" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error title=Sibling lookup failed::git ls-remote $url failed: $out"
+              exit 1
             fi
           done
-          if [ -n "$urls" ]; then
-            SIBLING_URLS="$urls" julia --color=yes --project=. -e '
+          if [ -n "$siblings" ]; then
+            SIBLINGS="$siblings" julia --color=yes --project=. -e '
               using Pkg
-              Pkg.add([PackageSpec(url=u, rev=ENV["BRANCH"]) for u in split(ENV["SIBLING_URLS"])])'
+              Pkg.add([PackageSpec(url=String(u), rev=String(r)) for (u, r) in split.(split(ENV["SIBLINGS"]), "@")])'
           fi
 
       - uses: julia-actions/julia-runtest@v1
@@ -79,7 +98,9 @@ jobs:
 
       - uses: julia-actions/julia-processcoverage@v1
 
+      # Coverage is advisory: an upload problem never fails the job.
       - uses: codecov/codecov-action@v7
+        continue-on-error: true
         with:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
