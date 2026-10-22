@@ -10,8 +10,11 @@ using ExplicitImports
 
 @testset "ExplicitImports" begin
     test_explicit_imports(StateSpaceEcon;
-        # TODO: names used through `using X` without being listed
-        no_implicit_imports=false,
+        # Plans keeps `using TimeSeriesEcon`: it evaluates strings read from plan files
+        # (ranges such as 2020Q1:2021Q4, frequencies) in its own namespace
+        no_implicit_imports=(ignore=(StateSpaceEcon.Plans,),),
+        # mean is used in `√mean(...)` (dfm/em.jl), which the analyzer does not see
+        no_stale_explicit_imports=(ignore=(:mean,),),
         # libblastrampoline is owned by libblastrampoline_jll, which is not a dependency
         all_qualified_accesses_via_owners=(ignore=(:libblastrampoline,),),
         # use of non-public names is checked later

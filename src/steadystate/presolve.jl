@@ -5,7 +5,7 @@
 # All rights reserved.
 ##################################################################################
 
-using ModelBaseEcon.OrderedCollections
+using ModelBaseEcon.OrderedCollections: OrderedCollections, OrderedDict
 
 """
     presolve_sstate!(model; <options>)

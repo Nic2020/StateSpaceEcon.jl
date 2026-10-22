@@ -7,14 +7,15 @@
 
 module FirstOrderSolver
 
-using SparseArrays
-using LinearAlgebra
-using ForwardDiff
-using DiffResults
-using Printf
+using SparseArrays: SparseArrays, SparseMatrixCSC, findnz
+using LinearAlgebra: LinearAlgebra, BLAS, Factorization, LAPACK, ldiv!, lu, rdiv!
+using ForwardDiff: ForwardDiff
+using DiffResults: DiffResults
+using Printf: Printf
 
-using ModelBaseEcon
-using TimeSeriesEcon
+using ModelBaseEcon: ModelBaseEcon, Model, inverse_transform, isexog, islinearized, islog, isneglog, isshock,
+    linearize!, refresh_med!, transform
+using TimeSeriesEcon: TimeSeriesEcon, MVTSeries, Workspace, lag, overlay
 
 import ModelBaseEcon.getevaldata
 import ModelBaseEcon.getsolverdata
