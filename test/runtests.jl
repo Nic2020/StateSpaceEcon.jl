@@ -414,6 +414,7 @@ end
 
 include("sim_solver.jl")
 include("worldage.jl")
+include("exceptions.jl")
 
 
 include("kalman.jl")

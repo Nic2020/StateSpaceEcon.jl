@@ -162,12 +162,19 @@ export dict2array, array2dict, dict2data, data2dict
 
 struct SimFailed <: Exception
     info
+    cause   # the exception that made the simulation fail, or `nothing`
 end
-Base.showerror(io::IO, ex::SimFailed) =
+SimFailed(info) = SimFailed(info, nothing)
+function Base.showerror(io::IO, ex::SimFailed)
     isnothing(ex.info) ? print(io, "Simulation failed.") :
     ex.info isa MIT ? print(io, "Simulation failed in period $(ex.info).") :
     ex.info isa AbstractUnitRange{<:MIT} ? print(io, "Simulation over $(ex.info) failed.") :
     print(io, "Simulation failed: $(ex.info)")
+    if !isnothing(ex.cause)
+        print(io, "\nCaused by: ")
+        showerror(io, ex.cause)
+    end
+end
 isfailed(f::SimFailed)::Bool = !isnothing(f.info)
 isfailed(f::SimData)::Bool = false
 isfailed(f::Workspace)::Bool = false

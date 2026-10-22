@@ -9,12 +9,13 @@
     return model
 end
 
+const _MAXITER_MESSAGE = "Non-linear solver reached maximum number of iterations (`maxiter`)."
 function check_converged(converged, warn_maxiter)
     if !converged
         if warn_maxiter == :error
-            error("Non-linear solver reached maximum number of iterations (`maxiter`).")
+            error(_MAXITER_MESSAGE)
         elseif warn_maxiter != false
-            @warn("Non-linear solver reached maximum number of iterations (`maxiter`).")
+            @warn(_MAXITER_MESSAGE)
         end
     end
 end

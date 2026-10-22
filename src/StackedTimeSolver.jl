@@ -15,7 +15,7 @@ for the model and running simulations.
 module StackedTimeSolver
 
 using SparseArrays: SparseArrays, SparseMatrixCSC, nnz, nzrange, rowvals, sparse
-using LinearAlgebra: LinearAlgebra, Factorization, SingularException, ldiv!, lu, lu!, norm
+using LinearAlgebra: LinearAlgebra, Factorization, LAPACKException, SingularException, ldiv!, lu, lu!, norm
 using ForwardDiff: ForwardDiff
 using DiffResults: DiffResults
 using Printf: Printf

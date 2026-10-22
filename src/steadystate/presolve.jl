@@ -39,7 +39,9 @@ function presolve_sstate! end
 function solve1d(sseqn, vals, ind, ::Val{:bisect}, tol = 1e-12, maxiter = 1000)
     R, J = try
         sseqn.eval_RJ(vals)
-    catch
+    catch err
+        # an inadmissible starting point leaves the equation unsolved; anything else is a bug
+        err isa DomainError || rethrow()
         return false
     end
     if abs(R) < tol && abs(J[ind]) > tol

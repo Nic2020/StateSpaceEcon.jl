@@ -37,7 +37,9 @@ function global_SS_R!(resid::AbstractVector{Float64}, point::AbstractVector{Floa
     for (eqind, eqn) in enumerate(eqns)
         rr = try
             eqn.eval_resid(point[eqn.vinds])
-        catch
+        catch err
+            # only a domain error means an inadmissible point; anything else is a bug
+            err isa DomainError || rethrow()
             NaN64
         end
         if isnan(rr) || isinf(rr)
@@ -80,7 +82,8 @@ function global_SS_RJ(point::AbstractVector{Float64}, eqns::EqnIter) where {EqnI
     for (eqind, eqn) in enumerate(eqns)
         rr, jj = try
             eqn.eval_RJ(point[eqn.vinds])
-        catch
+        catch err
+            err isa DomainError || rethrow()
             NaN64, fill(NaN64, size(eqn.vinds))
         end
         if isnan(rr) || isinf(rr) || any(@. isnan(jj) | isinf(jj))

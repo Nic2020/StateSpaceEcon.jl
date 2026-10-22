@@ -131,12 +131,10 @@ function first_step_lm!(xx::AbstractArray{Float64,1}, dx::AbstractArray{Float64,
         # actual residual and its norm
         lm.v_buffer .= xx .- dx
         qual = 0.0
-        try
-            global_SS_R!(lm.r_buffer, lm.v_buffer, lm.sd)
+        if _active_SS_R!(lm.r_buffer, lm.v_buffer, lm.sd) == 0
             n2AR = sum(abs2, lm.r_buffer)
             # quality of step
             qual = (n2AR - n2R) / (n2PR - n2R)
-        catch
         end
         if qual > 0.75 # very good quality, extend the trust region
             lambda = lambda / nu

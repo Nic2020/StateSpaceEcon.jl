@@ -8,7 +8,7 @@
 module DFMSolver
 
 # Julia Standard Library
-using LinearAlgebra: LinearAlgebra, BLAS, Cholesky, ColumnNorm, Diagonal, I, LAPACK, Symmetric, UpperTriangular,
+using LinearAlgebra: LinearAlgebra, BLAS, Cholesky, ColumnNorm, Diagonal, I, LAPACK, PosDefException, Symmetric, UpperTriangular,
     cholesky, cholesky!, diag, dot, eigen, isdiag, issymmetric, ldiv!, lmul!, lu, mul!, qr!, rdiv!, rmul!, svd
 using Printf: Printf, @sprintf
 using Random: Random, AbstractRNG, randn!
