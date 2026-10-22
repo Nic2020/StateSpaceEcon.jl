@@ -28,10 +28,12 @@ TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [compat]
+Aqua = "0.8"
 ComponentArrays = "0.15"
 DelimitedFiles = "1.8"
 DiffResults = "1"
 Distributions = "0.25"
+ExplicitImports = "1.15"
 ForwardDiff = "0.10, 1"
 Interpolations = "0.15"
 JLD2 = "0.5"
@@ -53,10 +55,12 @@ UnPack = "1"
 julia = "1.10"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Aqua", "ExplicitImports", "Test"]

@@ -419,6 +419,8 @@ include("worldage.jl")
 include("kalman.jl")
 include("dfmtests.jl")
 
+include("aqua.jl")
+include("explicit_imports.jl")
 
 # keep this one last because it overwrites getE?()
 include("modelchanges.jl")
