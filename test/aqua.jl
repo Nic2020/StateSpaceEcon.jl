@@ -10,9 +10,6 @@ using Aqua
 
 @testset "Aqua" begin
     Aqua.test_all(StateSpaceEcon;
-        # TODO: indexing an MVTSeries with an empty tuple of model variables matches
-        # both the StateSpaceEcon and the TimeSeriesEcon methods (simdata.jl)
-        ambiguities=(broken=true,),
         # StateSpaceEcon extends Base indexing of MVTSeries with model variables, and
         # transform/inverse_transform for matrices; these types are from the sibling packages
         piracies=(treat_as_own=[TimeSeriesEcon.MVTSeries, ModelBaseEcon.Model],),

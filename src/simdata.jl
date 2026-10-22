@@ -26,7 +26,7 @@ SimData(args...) = MVTSeries(args...)
 
 _getname(v::ModelVariable) = (@nospecialize(v); v.name)
 
-const _MVCollection = Union{Vector{ModelVariable},NTuple{N,ModelVariable}} where {N}
+const _MVCollection = Union{Vector{ModelVariable},Tuple{ModelVariable,Vararg{ModelVariable}}}
 # we should allow indexing with model variables
 Base.getindex(sd::MVTSeries, vars::_MVCollection) = getindex(sd, _getname.(vars))
 Base.getindex(sd::MVTSeries, vars::ModelVariable) = (@nospecialize(vars); getindex(sd, _getname(vars)))
