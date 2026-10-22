@@ -178,7 +178,7 @@ function SolverData(model::Model; presolve::Bool=true,
     sd.eqns_index[sd.solve_eqn] .= 1:sum(sd.solve_eqn)
     return sd
 end
-@assert precompile(SolverData, (Model,))
+precompile(SolverData, (Model,))
 
 
 """
@@ -218,7 +218,7 @@ function global_SS_RJ(point::AbstractVector{Float64}, sd::SolverData)
     end
     return R, J
 end
-@assert precompile(global_SS_RJ, (Vector{Float64}, SolverData))
+precompile(global_SS_RJ, (Vector{Float64}, SolverData))
 
 """
     R, J = global_SS_RJ(point, sd::SolverData)
@@ -253,5 +253,5 @@ function _active_SS_R!(resid::AbstractVector{Float64}, point::AbstractVector{Flo
     end
     return 0
 end
-@assert precompile(global_SS_R!, (Vector{Float64}, Vector{Float64}, SolverData))
+precompile(global_SS_R!, (Vector{Float64}, Vector{Float64}, SolverData))
 

@@ -169,4 +169,4 @@ function _sssolve!(model::Model;
     end
     return ss.values
 end
-@assert precompile(_sssolve!, (Model,))
+precompile(_sssolve!, (Model,))

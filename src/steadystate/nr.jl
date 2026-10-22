@@ -83,4 +83,4 @@ function step_nr!(xx::AbstractArray{Float64,1}, dx::AbstractArray{Float64,1},
     end
     return nothing
 end
-@assert precompile(step_nr!, (Array{Float64,1}, Array{Float64,1}, Array{Float64,1}, Array{Float64,2}, NRData))
+precompile(step_nr!, (Array{Float64,1}, Array{Float64,1}, Array{Float64,1}, Array{Float64,2}, NRData))

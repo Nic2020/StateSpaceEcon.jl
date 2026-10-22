@@ -54,7 +54,7 @@ function _check_sstate(model::Model; verbose::Bool = model.options.verbose, tol:
     end
     return bad_eqn
 end
-@assert precompile(_check_sstate, (Model,))
+precompile(_check_sstate, (Model,))
 
 
 
@@ -114,4 +114,4 @@ function _diagnose_sstate(point::AbstractVector{Float64}, model::Model)
     bad_var = vsyms[bad_var_mask]
     return bad_eqn, bad_var
 end
-@assert precompile(_diagnose_sstate, (Vector{Float64}, Model))
+precompile(_diagnose_sstate, (Vector{Float64}, Model))

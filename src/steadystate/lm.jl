@@ -91,7 +91,7 @@ function step_lm!(xx::AbstractArray{Float64,1}, dx::AbstractArray{Float64,1},
     lm.params[:] = [lambda, nu]
     return nothing
 end
-@assert precompile(step_lm!, (Array{Float64,1}, Array{Float64,1}, Array{Float64,1}, Array{Float64,2}, LMData))
+precompile(step_lm!, (Array{Float64,1}, Array{Float64,1}, Array{Float64,1}, Array{Float64,2}, LMData))
 
 """
     first_step_nr!(x, dx, resid, J, lm::LMData; verbose=false)
@@ -151,5 +151,5 @@ function first_step_lm!(xx::AbstractArray{Float64,1}, dx::AbstractArray{Float64,
     lm.params[:] = [lambda, nu]
     nothing
 end
-@assert precompile(first_step_lm!, (Array{Float64,1}, Array{Float64,1}, Array{Float64,1}, Array{Float64,2}, LMData))
+precompile(first_step_lm!, (Array{Float64,1}, Array{Float64,1}, Array{Float64,1}, Array{Float64,2}, LMData))
 

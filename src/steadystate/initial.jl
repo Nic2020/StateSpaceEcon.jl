@@ -49,7 +49,7 @@ function update_auxvars_ss(point::Vector{Float64}, model::Model)
 
     return result
 end
-@assert precompile(update_auxvars_ss, (Vector{Float64}, Model))
+precompile(update_auxvars_ss, (Vector{Float64}, Model))
 
 function _do_warn(args...)
     println(args...)
@@ -104,7 +104,7 @@ function _do_update_auxvars_presolve!(model::Model, verbose::Bool, method::Symbo
     end
     return nothing
 end
-@assert precompile(_do_update_auxvars_presolve!, (Model, Bool, Symbol,))
+precompile(_do_update_auxvars_presolve!, (Model, Bool, Symbol,))
 
 """
     clear_sstate!(model; lvl=0.1, slp=0.0, <options>)
@@ -134,7 +134,7 @@ function _clear_sstate!(model::Model; lvl = 0.1, slp = 0.0, verbose = model.opti
     return _do_update_auxvars_presolve!(model, verbose)
 end
 export clear_sstate!
-@assert precompile(_clear_sstate!, (Model,))
+precompile(_clear_sstate!, (Model,))
 
 """
     initial_sstate!(model, init; <options>)
@@ -173,6 +173,6 @@ function _initial_sstate!(model::Model, init::AbstractVector{Float64}; verbose =
     return _do_update_auxvars_presolve!(model, verbose)
 end
 export initial_sstate!
-@assert precompile(_initial_sstate!, (Model, Vector{Float64}))
+precompile(_initial_sstate!, (Model, Vector{Float64}))
 
 
