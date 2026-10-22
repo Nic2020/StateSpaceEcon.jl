@@ -153,6 +153,19 @@ end
     @test (data[c] = fill(1, size(data.c)); all(data.c .== 1))
     @test (data[[a, b]] = fill(2, (size(data, 1), 2)); all(data.a .== 2) && all(data.b .== 2))
     @test @view(data[:, a]) == @view(data[:, :a])
+
+    # tuples of model variables, with and without rows
+    r = 2020Q2:2020Q4
+    @test data[(a,)] == data[[a]]
+    @test data[(a, b)] == data[[a, b]]
+    @test data[r, (a, b)] == data[r, [:a, :b]]
+    @test (data[(a, b)] = fill(3, (size(data, 1), 2)); all(data.a .== 3) && all(data.b .== 3))
+    @test (data[r, (c,)] = fill(4, (length(r), 1)); all(data[r, :c] .== 4))
+    @test (view(data, (a, c)) .= 5; all(data.a .== 5) && all(data.c .== 5))
+    @test (view(data, r, (b,)) .= 6; all(data[r, :b] .== 6))
+    # an empty tuple has no model variables; TimeSeriesEcon's methods handle it
+    @test size(data[()]) == (size(data, 1), 0)
+    @test size(data[r, ()]) == (length(r), 0)
 end
 
 @testset "SimFailed" begin
