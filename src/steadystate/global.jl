@@ -9,15 +9,14 @@ _getparams(eqn) = hasproperty(eqn.eval_resid, :params) ? eqn.eval_resid.params :
                   hasproperty(eqn.eval_resid, :s) ? _getparams(eqn.eval_resid.s.eqn) :
                   ()
 function inadmissible_error(eqind, eqn, point, val)
-    vars = tuple(eqn.vsyms...)
-    args = tuple((eval(Expr(:(=), sym, val)) for (sym, val) in zip(eqn.vsyms, point[eqn.vinds]))...)
-    varsargs = (; (v => a for (v, a) in zip(vars, args))...)
+    # (pairs, not NamedTuple{names}: a variable can appear twice, e.g. in `x + x = 2`)
+    varsargs = (; (v => a for (v, a) in zip(eqn.vsyms, point[eqn.vinds]))...)
     params = (; _getparams(eqn)...)
     if typeof(val) <: AbstractArray
         @error "Singular gradient in steady state equation $(eqn.name) => $eqn" params varsargs val
         error("Singular gradient in steady state equation $(eqn.name) => $eqn")
     else
-        @error "Inadmissible point in steady state equation $(eqn.name)) => $eqn" params varsargs val
+        @error "Inadmissible point in steady state equation $(eqn.name) => $eqn" params varsargs val
         error("Inadmissible point in steady state equation $(eqn.name) => $eqn")
     end
 end
@@ -86,7 +85,7 @@ function global_SS_RJ(point::AbstractVector{Float64}, eqns::EqnIter) where {EqnI
             err isa DomainError || rethrow()
             NaN64, fill(NaN64, size(eqn.vinds))
         end
-        if isnan(rr) || isinf(rr) || any(@. isnan(jj) | isinf(jj))
+        if isnan(rr) || isinf(rr)
             inadmissible_error(eqind, eqn, point, rr)
             # args = tuple((eval(Expr(:(=), sym, val)) for (sym, val) in zip(eqn.vsyms, point[eqn.vinds]))...)
             # vars = tuple(eqn.vsyms...)

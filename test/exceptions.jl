@@ -247,3 +247,32 @@ end
     end
     @test isempty(out)
 end
+
+@testset "inadmissible point message" begin
+    SSS = StateSpaceEcon.SteadyStateSolver
+    m = Model()
+    m.flags.ssZeroSlope = true
+    @variables m exc_noeval
+    @equations m begin
+        0 = sqrt(exc_noeval[t])
+    end
+    @initialize m
+    # the message names the variable values without assigning them in the solver module
+    @suppress_err @test_throws "Inadmissible point" SSS.global_SS_RJ([-1.0, 0.0], m)
+    @test !any(occursin("exc_noeval", string(n)) for n in names(SSS; all=true))
+    # finite residual, infinite derivative
+    @test_throws "Singular gradient" @suppress_err SSS.global_SS_RJ([0.0, 0.0], m)
+    # a variable that appears twice in a constraint
+    m = Model()
+    m.flags.ssZeroSlope = true
+    @variables m exc_twice
+    @equations m begin
+        exc_twice[t] = exc_twice[t-1]
+    end
+    @initialize m
+    @steadystate m log(exc_twice) + log(exc_twice) = 0
+    vsyms = only(values(m.sstate.constraints)).vsyms
+    @test length(unique(vsyms)) < length(vsyms)
+    m.sstate.values .= [-1.0, 0.0]
+    @test_throws "Inadmissible point" @suppress_err check_sstate(m)
+end
