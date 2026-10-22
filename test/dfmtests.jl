@@ -201,6 +201,17 @@ end
 
 end
 
+@testset "EM impute interpolation" begin
+    # monotone cubic (Fritsch-Carlson) interpolation between the known values,
+    # moving average of the median before the first one; reference values
+    # computed with Interpolations 0.15.2
+    Y = [1.0 0.0; NaN 1.0; 2.0 NaN; NaN NaN; NaN 4.0; 5.0 NaN; 4.0 9.0; NaN 10.0; 6.0 12.0]
+    EY = copy(Y)
+    DFMSolver.em_impute_interpolation!(EY, Y)
+    @test EY ≈ [1.0 0.0; 1.4375 1.0; 2.0 1.8333333333333333; 3.111111111111111 2.6666666666666665;
+        4.388888888888889 4.0; 5.0 6.5; 4.0 9.0; 4.75 10.0; 6.0 12.0]
+end
+
 ##
 
 @testset "EM matrix constraint" begin
