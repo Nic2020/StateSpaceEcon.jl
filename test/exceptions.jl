@@ -72,7 +72,9 @@ function exc_dynmodel()
     sssolve!(m)
     return m
 end
-exc_shock(v) = (s = MVTSeries(1U:1U, (:e,), zeros); s[1U, :e] = v; s)
+struct ExcUnprintable end
+Base.show(::IO, ::ExcUnprintable) = error("cannot show")
+exc_shock(v) =(s = MVTSeries(1U:1U, (:e,), zeros); s[1U, :e] = v; s)
 
 @testset "exceptions, steady state" begin
     SSS = StateSpaceEcon.SteadyStateSolver
@@ -199,6 +201,9 @@ end
     @test !isfailed(r[2]) && r[2][1U, :x] ≈ exp(0.1)
     # without a cause, the message is as before
     @test sprint(showerror, SimFailed(1U)) == "Simulation failed in period 1U."
+    # a cause that cannot be displayed does not hide the failure
+    @test sprint(showerror, SimFailed(1U, DomainError(ExcUnprintable()))) ==
+          "Simulation failed in period 1U.\nCaused by: DomainError (cannot be displayed)"
 
     # a bug or an interrupt stops the simulation
     for err in (ArgumentError("damping bug"), InterruptException())

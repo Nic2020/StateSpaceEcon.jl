@@ -171,8 +171,14 @@ function Base.showerror(io::IO, ex::SimFailed)
     ex.info isa AbstractUnitRange{<:MIT} ? print(io, "Simulation over $(ex.info) failed.") :
     print(io, "Simulation failed: $(ex.info)")
     if !isnothing(ex.cause)
-        print(io, "\nCaused by: ")
-        showerror(io, ex.cause)
+        # the cause's own display (e.g. of a `DomainError` value) must not hide the failure
+        cause = try
+            sprint(showerror, ex.cause)
+        catch err
+            err isa InterruptException && rethrow()
+            "$(typeof(ex.cause)) (cannot be displayed)"
+        end
+        print(io, "\nCaused by: ", cause)
     end
 end
 isfailed(f::SimFailed)::Bool = !isnothing(f.info)
