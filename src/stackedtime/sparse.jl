@@ -102,7 +102,7 @@ macro _sf_check_factorize(exception, expression)
 end
 
 mutable struct LUFactorization{Tv<:Real} <: SF_Factorization{Tv}
-    F::SuiteSparse.UMFPACK.UmfpackLU{Tv,Int}
+    F::UMFPACK.UmfpackLU{Tv,Int}
     A::SparseMatrixCSC{Tv,Int}
 end
 

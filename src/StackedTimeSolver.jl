@@ -46,8 +46,7 @@ import ModelBaseEcon.setsolverdata!
 using Pardiso
 
 
-using SuiteSparse
-using SuiteSparse.UMFPACK
+using SparseArrays.UMFPACK
 
 include("stackedtime/sparse.jl")
 
@@ -66,8 +65,6 @@ end # module
 using .StackedTimeSolver
 
 export FinalCondition
-export NoFinalCondition
-export HasFinalCondition
 export FCNone, fcnone
 export FCGiven, fcgiven
 export FCMatchSSLevel, fclevel
