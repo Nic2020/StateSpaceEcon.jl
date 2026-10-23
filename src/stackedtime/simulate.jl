@@ -103,15 +103,13 @@ function simulate(m::Model,
     data_axes = axes(exog_ant)
 
     # the baseline is needed when either data is given as deviations from it
-    if deviation_ant || deviation_unant
-        if isempty(baseline)
-            baseline = steadystatearray(m, p_ant)
-        end
+    if (deviation_ant || deviation_unant) && isempty(baseline)
+        baseline = steadystatearray(m, p_ant)
+    end
+    if deviation_ant
         if size(baseline) != (NT, nvarshks)
             error("Incorrect dimensions of baseline. Expected $((NT, nvarshks)), got $(size(baseline)).")
         end
-    end
-    if deviation_ant
         exog_ant = copy(exog_ant)
         @views exog_ant[:, logvars] .*= baseline[:, logvars]
         @views exog_ant[:, .!logvars] .+= baseline[:, .!logvars]
