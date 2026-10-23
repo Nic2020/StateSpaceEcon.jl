@@ -14,7 +14,7 @@ using DiffResults: DiffResults
 using Printf: Printf
 
 using ModelBaseEcon: ModelBaseEcon, Model, inverse_transform, isexog, islinearized, islog, isneglog, isshock,
-    linearize!, refresh_med!, transform
+    linearize!, refresh_med!, transform, with_linearized
 using TimeSeriesEcon: TimeSeriesEcon, MVTSeries, Workspace, lag, overlay
 
 import ModelBaseEcon.getevaldata
