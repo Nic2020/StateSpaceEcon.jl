@@ -125,3 +125,21 @@ using TimeSeriesEcon.DataEcon
 
 end
 
+@testset "shockdecomp, aux vars" begin
+    # not supported yet: a clear error instead of an AssertionError deep inside
+    m = Model()
+    m.options.substitutions = true
+    @variables m x y
+    @shocks m e
+    @equations m begin
+        x[t] = 0.5 * x[t-1] + e[t]
+        y[t] = log(exp(x[t]) + 1)
+    end
+    @initialize m
+    @test m.nauxs > 0
+    sssolve!(m)
+    p = Plan(m, 1U:10U)
+    data = steadystatedata(m, p)
+    data[1U, :e] = 0.1
+    @test_throws r"Not implemented: `shockdecomp`.*auxiliary variables" shockdecomp(m, p, data)
+end

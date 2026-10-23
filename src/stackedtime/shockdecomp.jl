@@ -54,9 +54,10 @@ function shockdecomp(m::Model, p::Plan, exog_data::SimData;
         error("Not implemented: `shockdecomp` with `solver=:stackedtime` and `anticipate=false`. If the model is linear, use `solver=:firstorder`.")
     end
 
-    # if m.nauxs > 0
-    #     error("Not yet implemented with auxiliary variables.")
-    # end
+    # the data below has no columns for the auxiliary variables, which the solver needs
+    if m.nauxs > 0
+        error("Not implemented: `shockdecomp` with `solver=:stackedtime` for a model with auxiliary variables (`substitutions=true`).")
+    end
 
     # we will return result at the end
     result = Workspace()
