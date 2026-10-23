@@ -142,4 +142,12 @@ end
     data = steadystatedata(m, p)
     data[1U, :e] = 0.1
     @test_throws r"Not implemented: `shockdecomp`.*auxiliary variables" shockdecomp(m, p, data)
+    # it works with columns for the auxiliary variables
+    a = ModelBaseEcon.update_auxvars(data2array(steadystatedata(m, p)), m)
+    control = MVTSeries(first(p.range), Symbol.(m.allvars), a)
+    data = copy(control)
+    data[1U, :e] = 0.1
+    sd = shockdecomp(m, p, data; control)
+    @test sd.s[1U, :x] ≈ 0.1
+    @test sd.s[1U, :y] ≈ log(exp(0.1) + 1)
 end
