@@ -621,4 +621,8 @@ end
     r = simulate(m, p, ss, p, dev; deviation_ant=false, deviation_unant=true)
     @test r ≈ simulate(m, p, ss, p, ss .+ dev)
     @test r[2U, :y] ≈ 2.1
+    # the given data are not modified
+    dev0 = copy(dev)
+    simulate(m, p, dev, p, dev; deviation=true)
+    @test dev == dev0
 end

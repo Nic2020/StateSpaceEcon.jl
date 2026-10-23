@@ -162,6 +162,7 @@ function simulate(m::Model,
                 error("Anticipated and unanticipated ranges don't match.")
             end
             if deviation_unant
+                exog_unant = copy(exog_unant)   # do not modify the caller's data
                 @views exog_unant[:, logvars] .*= baseline[:, logvars]
                 @views exog_unant[:, .!logvars] .+= baseline[:, .!logvars]
             end
