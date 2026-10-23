@@ -27,6 +27,7 @@ import ..SimData
 
 import ..steadystatearray
 import ..steadystatedata
+import ..StackedTimeSolver
 
 include("firstorder/QZ.jl")
 include("firstorder/solve.jl")

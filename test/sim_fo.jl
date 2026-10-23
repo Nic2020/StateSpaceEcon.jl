@@ -416,3 +416,20 @@ end
 
 end
 
+@testset "fo.ant.swap" begin
+    # anticipated first-order simulation with a swapped plan runs the
+    # stacked-time solver on the linearized model (it used to call itself)
+    m = getE3()
+    clear_sstate!(m)
+    sssolve!(m)
+    solve!(m, solver=:firstorder)
+    p = Plan(m, 1U:20U)
+    exogenize!(p, :pinf, 3U)
+    endogenize!(p, :pinf_shk, 3U)
+    data = steadystatedata(m, p)
+    data[3U, :pinf] += 0.1
+    fo = @test_logs (:warn, r"linearized stacked-time") simulate(m, p, data; solver=:firstorder, anticipate=true)
+    @test fo[3U, :pinf] ≈ data[3U, :pinf]
+    @test fo ≈ simulate(m, p, data; solver=:stackedtime, anticipate=true, variant=:linearize)
+    @test !(fo ≈ data)
+end
