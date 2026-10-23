@@ -602,3 +602,23 @@ end
     end
 end
 
+@testset "deviation_unant only" begin
+    # anticipated data in levels, unanticipated data as deviations from the steady state
+    m = Model()
+    @variables m y
+    @shocks m e
+    @parameters m a = 2.0
+    @equations m begin
+        y[t] = 0.5 * y[t-1] + 0.5 * a + e[t]
+    end
+    @initialize m
+    sssolve!(m)
+    p = Plan(m, 1U:10U)
+    ss = steadystatedata(m, p)
+    dev = copy(ss)
+    dev .= 0
+    dev[2U, :e] = 0.1
+    r = simulate(m, p, ss, p, dev; deviation_ant=false, deviation_unant=true)
+    @test r ≈ simulate(m, p, ss, p, ss .+ dev)
+    @test r[2U, :y] ≈ 2.1
+end
