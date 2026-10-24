@@ -55,7 +55,7 @@ function shockdecomp(m::Model, p::Plan, exog_data::SimData;
     end
 
     # the solver needs columns for the auxiliary variables, which the data usually does not have
-    if m.nauxs > 0 && !(size(exog_data, 2) == size(control, 2) == length(m.allvars))
+    if m.nauxs > 0 && !(collect(colnames(exog_data)) == collect(colnames(control)) == Symbol.(m.allvars))
         error("Not implemented: `shockdecomp` with `solver=:stackedtime` for a model with auxiliary variables (`substitutions=true`), unless `exog_data` and `control` have exactly the columns of `model.allvars`, in that order.")
     end
     if m.nauxs > 0 && deviation

@@ -22,7 +22,7 @@ using Printf: Printf
 
 using ModelBaseEcon: ModelBaseEcon, Model, ModelVariable, Options, eval_R!, eval_RJ, getoption, inverse_transform,
     isexog, islin, islog, isneglog, isshock, issssolved, refresh_med!, shocks, transform
-using TimeSeriesEcon: TimeSeriesEcon, MVTSeries, TSeries, U, Workspace, firstdate, lastdate, overlay, rangeof, rawdata
+using TimeSeriesEcon: TimeSeriesEcon, MVTSeries, TSeries, U, Workspace, colnames, firstdate, lastdate, overlay, rangeof, rawdata
 
 using TimerOutputs: TimerOutputs, @timeit_debug, TimerOutput
 const timer = TimerOutput()

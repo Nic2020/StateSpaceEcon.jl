@@ -150,6 +150,9 @@ end
     sd = shockdecomp(m, p, data; control)
     @test sd.s[1U, :x] ≈ 0.1
     @test sd.s[1U, :y] ≈ log(exp(0.1) + 1)
+    # the columns must be those of `m.allvars`, in that order
+    swapped = control[Tuple(reverse(Symbol.(m.allvars)))]
+    @test_throws r"exactly the columns of `model.allvars`" shockdecomp(m, p, copy(swapped); control=swapped)
     # data as deviations are not supported with auxiliary variables
     @test_throws r"Not implemented: `shockdecomp`.*`deviation=true`.*auxiliary variables" shockdecomp(m, p, data - control; control, deviation=true)
 end
