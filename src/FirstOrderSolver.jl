@@ -14,10 +14,12 @@ using DiffResults: DiffResults
 using Printf: Printf
 
 using ModelBaseEcon: ModelBaseEcon, Model, inverse_transform, isexog, islinearized, islog, isneglog, isshock,
-    linearize!, refresh_med!, transform, with_linearized
+    linearize!, refresh_med!, transform
 using TimeSeriesEcon: TimeSeriesEcon, MVTSeries, Workspace, lag, overlay
 
 import ModelBaseEcon.getevaldata
+import ModelBaseEcon.setevaldata!
+import ModelBaseEcon.LinearizedModelEvaluationData
 import ModelBaseEcon.getsolverdata
 import ModelBaseEcon.hassolverdata
 import ModelBaseEcon.setsolverdata!

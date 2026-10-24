@@ -454,4 +454,31 @@ end
     @test fo[2U, :e] ≈ 0.1
     # the model's linearization is unchanged
     @test ModelBaseEcon.getevaldata(m, :linearize).deviation
+    # linearized about a point other than the steady state: the fallback uses that linearization
+    m = Model()
+    @variables m y
+    @shocks m e
+    @equations m begin
+        y[t] = 0.1 * y[t-1]^2 + 1 + e[t]
+    end
+    @initialize m
+    sssolve!(m)
+    y0 = m.sstate.y.level
+    custom = deepcopy(m.sstate)
+    custom.y.level = 2.0
+    linearize!(m; sstate=custom)
+    solve!(m, solver=:firstorder)
+    lmed = ModelBaseEcon.getevaldata(m, :linearize)
+    variant = m.options.variant
+    p = Plan(m, 1U:5U)
+    exogenize!(p, :y, 2U)
+    endogenize!(p, :e, 2U)
+    data = steadystatedata(m, p)
+    data[2U, :y] = 2.2
+    fo = @test_logs (:warn, r"linearized stacked-time") simulate(m, p, data; solver=:firstorder, anticipate=true)
+    # about y = 2 the model is y[t] = 0.4 * y[t-1] + 0.6 + e[t]
+    @test fo[2U, :e] ≈ 2.2 - 0.4 * (0.4 * y0 + 0.6) - 0.6
+    @test fo[3U, :y] ≈ 0.4 * 2.2 + 0.6
+    @test ModelBaseEcon.getevaldata(m, :linearize) === lmed
+    @test m.options.variant == variant
 end
