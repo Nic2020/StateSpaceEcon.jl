@@ -621,6 +621,8 @@ end
     r = simulate(m, p, ss, p, dev; deviation_ant=false, deviation_unant=true)
     @test r ≈ simulate(m, p, ss, p, ss .+ dev)
     @test r[2U, :y] ≈ 2.1
+    # data in levels, result as deviations from the default baseline
+    @test simulate(m, p, ss, p, ss .+ dev; deviation=true, deviation_ant=false, deviation_unant=false) ≈ r .- ss
     # a baseline that broadcasts over the rows is accepted
     @test simulate(m, p, ss, p, dev; deviation_ant=false, deviation_unant=true, baseline=[2.0 0.0]) ≈ r
     # the given data are not modified

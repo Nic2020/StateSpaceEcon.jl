@@ -103,7 +103,8 @@ function simulate(m::Model,
     data_axes = axes(exog_ant)
 
     # the baseline is needed when either data is given as deviations from it
-    if (deviation_ant || deviation_unant) && isempty(baseline)
+    # (and for the result when `deviation` is set)
+    if (deviation || deviation_ant || deviation_unant) && isempty(baseline)
         baseline = steadystatearray(m, p_ant)
     end
     if deviation_ant
