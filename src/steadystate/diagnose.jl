@@ -80,7 +80,8 @@ steady state constraints until you get a unique solution. See
     Call [`check_sstate`](@ref) instead.
 """
 diagnose_sstate(model::Model) = diagnose_sstate(model.sstate.values, model)
-diagnose_sstate(point::AbstractVector{Float64}, model::Model) = Base.invokelatest(_diagnose_sstate, point, model)
+diagnose_sstate(point::AbstractVector{Float64}, model::Model) =
+    Base.invokelatest(_diagnose_sstate, point, model)::Tuple{Tuple{Vararg{String}},Vector{Symbol}}
 function _diagnose_sstate(point::AbstractVector{Float64}, model::Model)
     tol = model.options.tol 
     rr, jj = global_SS_RJ(point, model)

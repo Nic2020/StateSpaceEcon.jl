@@ -82,6 +82,8 @@ end
     @test r.RJ ≈ zeros(5) atol = 1e-12
     @test r.nbad == 0
     @test isempty(r.bad_eqns)
+    # the wrappers keep the return types the bodies infer
+    @test Base.return_types(diagnose_sstate, (Model,)) == [Tuple{Tuple{Vararg{String}},Vector{Symbol}}]
     @test r.ss ≈ [0.0, 0.0, 1.0, 0.0, 0.0, 0.0] atol = 1e-12
 
     s = world_age_simulate()
