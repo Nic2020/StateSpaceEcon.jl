@@ -32,7 +32,6 @@ Distributions = "0.25"
 ExplicitImports = "1.15"
 ForwardDiff = "0.10, 1"
 Interpolations = "0.15, 0.16"
-JLD2 = "0.5"
 LinearAlgebra = "1.8"
 MacroTools = "0.5"
 # MKL_jll = "2021, 2022, 2023, 2024"  # disallow 2025 - does not throw an error for singular matrices
@@ -54,9 +53,8 @@ julia = "1.10"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
-JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "DelimitedFiles", "ExplicitImports", "JLD2", "Suppressor", "Test"]
+test = ["Aqua", "DelimitedFiles", "ExplicitImports", "Suppressor", "Test"]
