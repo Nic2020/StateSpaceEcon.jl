@@ -94,7 +94,9 @@ function sim_nr!(x::AbstractArray{Float64}, sd::StackedTimeSolverData,
             nFtmp = try
                 stackedtime_R!(Fx, xtmp, xtmp, sd)
                 norm(Fx, Inf)
-            catch
+            catch err
+                # only a domain error means an inadmissible trial point; anything else is a bug
+                err isa DomainError || rethrow()
                 NaN
             end
             accepted, λ = damping(it, λ, nFtmp, Fx, Jx, Δx)::Tuple{Bool,Float64}

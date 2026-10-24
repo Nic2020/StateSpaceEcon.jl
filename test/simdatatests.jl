@@ -153,6 +153,19 @@ end
     @test (data[c] = fill(1, size(data.c)); all(data.c .== 1))
     @test (data[[a, b]] = fill(2, (size(data, 1), 2)); all(data.a .== 2) && all(data.b .== 2))
     @test @view(data[:, a]) == @view(data[:, :a])
+
+    # tuples of model variables, with and without rows
+    r = 2020Q2:2020Q4
+    @test data[(a,)] == data[[a]]
+    @test data[(a, b)] == data[[a, b]]
+    @test data[r, (a, b)] == data[r, [:a, :b]]
+    @test (data[(a, b)] = fill(3, (size(data, 1), 2)); all(data.a .== 3) && all(data.b .== 3))
+    @test (data[r, (c,)] = fill(4, (length(r), 1)); all(data[r, :c] .== 4))
+    @test (view(data, (a, c)) .= 5; all(data.a .== 5) && all(data.c .== 5))
+    @test (view(data, r, (b,)) .= 6; all(data[r, :b] .== 6))
+    # an empty tuple has no model variables; TimeSeriesEcon's methods handle it
+    @test size(data[()]) == (size(data, 1), 0)
+    @test size(data[r, ()]) == (length(r), 0)
 end
 
 @testset "SimFailed" begin
@@ -166,3 +179,25 @@ end
     @test isfailed.([foo, bar, foo]) == [false, true, false]
 end
 
+@testset "steadystatedata(m, rng)" begin
+    # the deprecated range method must use the same default `ref` as the Plan method
+    m = getE1()
+    m.sstate.y.level = 2.0
+    m.sstate.y.slope = 0.1
+    rng = 2020Q1:2020Q4
+    # `@test_deprecated ex` returns the value of `ex` only when deprecations warn;
+    # with --depwarn=error it tests that `ex` throws instead, so there is no value
+    deprecated_equals(f, expected) = Base.JLOptions().depwarn == 2 ?
+        (@test_deprecated f()) : (@test (@test_deprecated f()) == expected)
+    expected = steadystatedata(m, Plan(m, rng))
+    deprecated_equals(() -> steadystatedata(m, rng), expected)
+    @test expected[first(rng), :y] ≈ 2.0
+    ref = first(rng) + 2
+    deprecated_equals(() -> steadystatedata(m, rng; ref), steadystatedata(m, Plan(m, rng); ref))
+    deprecated_equals(() -> steadystatearray(m, rng), steadystatearray(m, Plan(m, rng)))
+    # integer ranges: Plan converts them to MIT{Unit}
+    for irng in (1:4, Base.OneTo(4))
+        deprecated_equals(() -> steadystatedata(m, irng), steadystatedata(m, Plan(m, irng)))
+        deprecated_equals(() -> steadystatearray(m, irng), steadystatearray(m, Plan(m, irng)))
+    end
+end

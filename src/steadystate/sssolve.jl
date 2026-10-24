@@ -23,7 +23,8 @@ Specific options
     method starts with the LM algorithm and automatically switches to NR when it
     starts to converge. Default is `:nr`.
 """
-function sssolve!(model::Model;
+sssolve!(model::Model; kwargs...) = Base.invokelatest(_sssolve!, model; kwargs...)::Vector{Float64}
+function _sssolve!(model::Model;
     verbose::Bool = model.options.verbose,
     tol::Float64 = model.options.tol,
     maxiter::Int64 = model.options.maxiter,
@@ -107,21 +108,24 @@ function sssolve!(model::Model;
         xx .-= dx
 
         # try updating the auxiliary variables
-        if any(sd.solve_var[length(model.variables)*2+1:end])
-            try
-                global_SS_R!(r0, xx, sd)
-                n1 = sum(abs2, r0)
-                ssvals[sd.solve_var] .= xx
-                ssvals .= update_auxvars_ss(ssvals, model)
-                global_SS_R!(r0, ssvals[sd.solve_var], sd)
-                n2 = sum(abs2, r0)
-                if n2 < n1
+        # (skipped if the residual is not finite before or after the update)
+        if any(sd.solve_var[length(model.variables)*2+1:end]) && _active_SS_R!(r0, xx, sd) == 0
+            n1 = sum(abs2, r0)
+            ssvals[sd.solve_var] .= xx
+            auxvals = try
+                update_auxvars_ss(ssvals, model)
+            catch err
+                err isa DomainError || rethrow()
+                nothing
+            end
+            if !isnothing(auxvals)
+                ssvals .= auxvals
+                if _active_SS_R!(r0, ssvals[sd.solve_var], sd) == 0 && sum(abs2, r0) < n1
                     xx .= ssvals[sd.solve_var]
                     if verbose
                         @info "    -- updated auxiliary variables"
                     end
                 end
-            catch
             end
         end
 
@@ -165,4 +169,4 @@ function sssolve!(model::Model;
     end
     return ss.values
 end
-@assert precompile(sssolve!, (Model,))
+precompile(_sssolve!, (Model,))

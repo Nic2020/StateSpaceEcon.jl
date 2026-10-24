@@ -26,7 +26,7 @@ SimData(args...) = MVTSeries(args...)
 
 _getname(v::ModelVariable) = (@nospecialize(v); v.name)
 
-const _MVCollection = Union{Vector{ModelVariable},NTuple{N,ModelVariable}} where {N}
+const _MVCollection = Union{Vector{ModelVariable},Tuple{ModelVariable,Vararg{ModelVariable}}}
 # we should allow indexing with model variables
 Base.getindex(sd::MVTSeries, vars::_MVCollection) = getindex(sd, _getname.(vars))
 Base.getindex(sd::MVTSeries, vars::ModelVariable) = (@nospecialize(vars); getindex(sd, _getname(vars)))
@@ -162,12 +162,25 @@ export dict2array, array2dict, dict2data, data2dict
 
 struct SimFailed <: Exception
     info
+    cause   # the exception that made the simulation fail, or `nothing`
 end
-Base.showerror(io::IO, ex::SimFailed) =
+SimFailed(info) = SimFailed(info, nothing)
+function Base.showerror(io::IO, ex::SimFailed)
     isnothing(ex.info) ? print(io, "Simulation failed.") :
     ex.info isa MIT ? print(io, "Simulation failed in period $(ex.info).") :
     ex.info isa AbstractUnitRange{<:MIT} ? print(io, "Simulation over $(ex.info) failed.") :
     print(io, "Simulation failed: $(ex.info)")
+    if !isnothing(ex.cause)
+        # the cause's own display (e.g. of a `DomainError` value) must not hide the failure
+        cause = try
+            sprint(showerror, ex.cause)
+        catch err
+            err isa InterruptException && rethrow()
+            "$(typeof(ex.cause)) (cannot be displayed)"
+        end
+        print(io, "\nCaused by: ", cause)
+    end
+end
 isfailed(f::SimFailed)::Bool = !isnothing(f.info)
 isfailed(f::SimData)::Bool = false
 isfailed(f::Workspace)::Bool = false
