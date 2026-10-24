@@ -150,4 +150,6 @@ end
     sd = shockdecomp(m, p, data; control)
     @test sd.s[1U, :x] ≈ 0.1
     @test sd.s[1U, :y] ≈ log(exp(0.1) + 1)
+    # data as deviations are not supported with auxiliary variables
+    @test_throws r"Not implemented: `shockdecomp`.*`deviation=true`.*auxiliary variables" shockdecomp(m, p, data - control; control, deviation=true)
 end
