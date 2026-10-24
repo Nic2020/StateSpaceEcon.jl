@@ -177,6 +177,28 @@ end
         @test_throws exc_expected(err) exc_armed(() -> simulate(m, p, d; linesearch=true), err)
     end
 
+    # two equations: the first one's residual shrinks before the second one throws, so the
+    # damping must not judge the trial step by the partly updated residual
+    m2 = Model()
+    @variables m2 a b
+    @shocks m2 ea eb
+    @equations m2 begin
+        a[t] = 0.5 * a[t-1] + ea[t]
+        log(b[t]) = 0.5 * log(b[t-1]) + eb[t]
+    end
+    @initialize m2
+    @steadystate m2 b = 1
+    sssolve!(m2)
+    p2 = Plan(m2, 1U:10U)
+    d2 = steadystatedata(m2, p2)
+    d2[1U, :ea] = 10.0
+    d2[1U, :eb] = -3.0
+    for kw in ((linesearch=true,), (damping=:br81,))
+        r = simulate(m2, p2, d2; kw...)
+        @test r[1U, :a] ≈ 10.0
+        @test r[1U:3U, :b].values ≈ exp.(-3.0 .* [1, 0.5, 0.25])
+    end
+
     # Levenberg-Marquardt: the first trial point is negative
     d = steadystatedata(m, p)
     d[1U, :e] = -1.5
