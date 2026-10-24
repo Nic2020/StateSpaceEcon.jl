@@ -200,4 +200,25 @@ end
         deprecated_equals(() -> steadystatedata(m, irng), steadystatedata(m, Plan(m, irng)))
         deprecated_equals(() -> steadystatearray(m, irng), steadystatearray(m, Plan(m, irng)))
     end
+    if Base.JLOptions().depwarn == 2
+        # with --depwarn=error the deprecated methods never get to their bodies; check the
+        # values in a process where deprecations are ignored
+        code = """
+            using StateSpaceEcon, ModelBaseEcon, TimeSeriesEcon, Test
+            @using_example E1
+            m = E1.newmodel()
+            m.sstate.y.level = 2.0
+            m.sstate.y.slope = 0.1
+            rng = 2020Q1:2020Q4
+            @test steadystatedata(m, rng) == steadystatedata(m, Plan(m, rng))
+            @test steadystatedata(m, rng; ref=first(rng) + 2) == steadystatedata(m, Plan(m, rng); ref=first(rng) + 2)
+            @test steadystatearray(m, rng) == steadystatearray(m, Plan(m, rng))
+            for irng in (1:4, Base.OneTo(4))
+                @test steadystatedata(m, irng) == steadystatedata(m, Plan(m, irng))
+                @test steadystatearray(m, irng) == steadystatearray(m, Plan(m, irng))
+            end
+            """
+        cmd = `$(Base.julia_cmd()) --startup-file=no --depwarn=no --project=$(Base.active_project()) -e $code`
+        @test success(pipeline(cmd; stdout=devnull, stderr=stderr))
+    end
 end
