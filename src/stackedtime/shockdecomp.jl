@@ -20,7 +20,7 @@ residual and issue a warning, but do not enforce this. See
 [`steadystatedata`](@ref).
 
 As part of the algorithm we run a simulation with the given `plan`,
-`exog_data` and `fctype`.  See [`simulate`](@ref) for other options.
+`exog_data` and `fctype`.  See [`simulate`](@ref StateSpaceEcon.simulate) for other options.
 
 !!! note
 
