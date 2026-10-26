@@ -95,7 +95,7 @@ function sim_nr!(x::AbstractArray{Float64}, sd::StackedTimeSolverData,
                 stackedtime_R!(Fx, xtmp, xtmp, sd)
                 norm(Fx, Inf)
             catch err
-                # only a domain error means an inadmissible trial point; anything else is a bug
+                # only a domain error means an inadmissible trial point; anything else is not an inadmissible point and propagates
                 err isa DomainError || rethrow()
                 # the damping functions look at the residual itself, which is now partly updated
                 fill!(Fx, NaN)

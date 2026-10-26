@@ -92,8 +92,9 @@ const _PARDISO_PIVOT_MESSAGE = "Zero or near-zero pivot."
 
 # Whether an exception thrown while solving means that the system cannot be
 # solved at this point (`stoch_simulate` then marks the realization as failed),
-# as opposed to a bug, an interrupt, or a problem with the solver library itself
-# (memory, invalid input), which must propagate. Pardiso uses `PardisoException`
+# as opposed to any other exception (an error in the model or the code, an
+# interrupt, a problem with the solver library itself
+# such as memory or invalid input), which must propagate. Pardiso uses `PardisoException`
 # for both kinds, so its numerical failures are recognized by their message;
 # if that message ever changes, the error propagates instead of being hidden.
 _is_numerical_failure(::Any) = false

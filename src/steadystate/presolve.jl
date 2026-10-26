@@ -40,7 +40,7 @@ function solve1d(sseqn, vals, ind, ::Val{:bisect}, tol = 1e-12, maxiter = 1000)
     R, J = try
         sseqn.eval_RJ(vals)
     catch err
-        # an inadmissible starting point leaves the equation unsolved; anything else is a bug
+        # an inadmissible starting point leaves the equation unsolved; anything else propagates
         err isa DomainError || rethrow()
         return false
     end

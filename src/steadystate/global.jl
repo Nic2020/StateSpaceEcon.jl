@@ -37,7 +37,7 @@ function global_SS_R!(resid::AbstractVector{Float64}, point::AbstractVector{Floa
         rr = try
             eqn.eval_resid(point[eqn.vinds])
         catch err
-            # only a domain error means an inadmissible point; anything else is a bug
+            # only a domain error means an inadmissible point; anything else is not an inadmissible point and propagates
             err isa DomainError || rethrow()
             NaN64
         end

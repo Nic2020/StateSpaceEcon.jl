@@ -129,7 +129,7 @@ function stoch_simulate(m::Model, p::Plan, baseline::SimData, shocks;
             eₜ[t, axes(shock, 2)] .+= shock[t, :]   # 
 
             # solve; a numerical failure marks this realization as failed,
-            # anything else (a bug, an interrupt) stops the simulation
+            # anything else (an error in the model or the code, an interrupt) stops the simulation
             converged = try
                 sim_solve!(eₜ, dₜ, maxiter, tol, verbose, damping)
             catch err

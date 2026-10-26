@@ -91,7 +91,7 @@ function _sim_lm_first_step(
             # quality of step
             qual = (n2AR - n2R) / (n2PR - n2R)
         catch err
-            # only a domain error means an inadmissible trial point; anything else is a bug
+            # only a domain error means an inadmissible trial point; anything else is not an inadmissible point and propagates
             err isa DomainError || rethrow()
         end
         if qual > 0.75 # very good quality, extend the trust region

@@ -160,6 +160,15 @@ export dict2array, array2dict, dict2data, data2dict
 @deprecate data2dict(args...; kwargs...) data2workspace(args...; kwargs...)
 
 
+"""
+    SimFailed(info, cause = nothing)
+
+The result of a simulation that failed, for example a realization in
+[`stoch_simulate`](@ref). `info` is where it failed (usually the period, an
+`MIT`) and `cause` is the exception that made it fail, or `nothing`. Its
+display (`showerror`) shows both. `isfailed` returns `true` for a `SimFailed`
+whose `info` is not `nothing`.
+"""
 struct SimFailed <: Exception
     info
     cause   # the exception that made the simulation fail, or `nothing`

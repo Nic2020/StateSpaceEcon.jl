@@ -22,6 +22,21 @@ Specific options
     for Newton-Raphson, `:lm` for Levenberg-Marquardt, and `:auto`. The `:auto`
     method starts with the LM algorithm and automatically switches to NR when it
     starts to converge. Default is `:nr`.
+
+### Exceptions from the model's equations
+Only a `DomainError` thrown while evaluating the equations (for example `log`
+or `sqrt` of a negative number) marks a point as inadmissible. At a trial
+point (the Newton line search, enabled with `nropts = Options(linesearch =
+true)`, and the first Levenberg-Marquardt step) the solver rejects such a point
+and tries a shorter step; in the presolve, an equation that cannot be evaluated
+at the starting point is left unsolved. Anywhere else, the solver stops with an
+"Inadmissible point" `ErrorException`. Any other exception from the equations
+propagates unchanged.
+
+If a function used in your equations cannot handle some arguments and you want
+the solver to back off, throw a `DomainError` for them (and keep the function
+working with ForwardDiff dual numbers). Do not return `NaN` instead, and do not
+turn every exception into a `DomainError`: that would hide errors in the model.
 """
 sssolve!(model::Model; kwargs...) = Base.invokelatest(_sssolve!, model; kwargs...)::Vector{Float64}
 function _sssolve!(model::Model;

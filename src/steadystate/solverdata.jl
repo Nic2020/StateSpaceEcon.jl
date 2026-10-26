@@ -203,7 +203,7 @@ function global_SS_RJ(point::AbstractVector{Float64}, sd::SolverData)
         rr, jj = try
             eqn.eval_RJ(sd.point[eqn.vinds]) 
         catch err
-            # only a domain error means an inadmissible point; anything else is a bug
+            # only a domain error means an inadmissible point; anything else is not an inadmissible point and propagates
             err isa DomainError || rethrow()
             (NaN64, fill(NaN64, size(eqn.vinds)))
         end

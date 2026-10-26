@@ -136,6 +136,17 @@ The following options are specific to the `:stackedtime` solver
       - `(:br81, :rateK => 10, :delta => 0.1)` : override the default parameters
         of the Bank & Rose (1981) algorithm.
 
+### Exceptions from the model's equations
+With the `:stackedtime` solver, a `DomainError` thrown while evaluating the
+equations (for example `log` of a negative number) at a trial point of the line
+search (`linesearch=true`, `damping=:armijo` or `:br81`) or at the first step of
+`:sim_lm` rejects that point, and the solver tries a shorter step. Anywhere
+else it propagates, as does any other exception from the equations. Two limits:
+when the line search reaches its minimum step size it accepts the step anyway,
+and a residual that evaluates to `NaN` is not detected as a failure. So, in a
+function used in your equations, throw a `DomainError` for arguments it cannot
+handle rather than returning `NaN`. See also [`stoch_simulate`](@ref).
+
 """
 function simulate end
 export simulate
@@ -207,6 +218,17 @@ realizations are taken as unanticipated and the same plan is used for both
 components.
 
 Currently only the case of `solver=stackedtime` is implemented.
+
+A realization whose simulation fails numerically is stored as a
+[`SimFailed`](@ref) holding the period and the exception, and the other
+realizations continue. Numerical failures are: a `DomainError` from the
+equations, a failed factorization of the Jacobian (`SingularException`,
+`LAPACKException`, `PardisoPosDefException`, or Pardiso's zero pivot or singular
+diagonal), and, with `warn_maxiter=:error`, reaching `maxiter`. Any other
+exception stops `stoch_simulate`, and the results computed so far are not
+returned; so does a failure while preparing the baseline, before the
+realizations are simulated. `isfailed(result)` tells whether a realization
+failed.
 
 """
 function stoch_simulate end
