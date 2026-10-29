@@ -100,8 +100,9 @@ function simulate(model::Model, plan::Plan, exog::AbstractMatrix;
         variant = model.options.variant
         setevaldata!(model, linearize=LinearizedModelEvaluationData(false, lmed.sspt, lmed.med))
         try
+            # `variant` last, so that one passed by the caller cannot select the nonlinear model
             return StackedTimeSolver.simulate(model, plan, exog;
-                deviation, anticipate, verbose, baseline, variant=:linearize, kwargs...)
+                deviation, anticipate, verbose, baseline, kwargs..., variant=:linearize)
         finally
             setevaldata!(model, linearize=lmed)
             model.options.variant = variant

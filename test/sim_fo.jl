@@ -481,4 +481,9 @@ end
     @test fo[3U, :y] ≈ 0.4 * 2.2 + 0.6
     @test ModelBaseEcon.getevaldata(m, :linearize) === lmed
     @test m.options.variant == variant
+    # a `variant` passed by the caller does not make the fallback run the nonlinear model
+    fo2 = @test_logs (:warn, r"linearized stacked-time") simulate(m, p, data; solver=:firstorder,
+        anticipate=true, variant=:default)
+    @test fo2 ≈ fo
+    @test m.options.variant == variant
 end
