@@ -230,6 +230,11 @@ end
     @test sprint(show, MIME("text/plain"), r[1]) == sprint(showerror, r[1])
     @test sprint(show, MIME("text/plain"), SimFailed(1U, DomainError(ExcUnprintable()))) ==
           "Simulation failed in period 1U.\nCaused by: DomainError (cannot be displayed)"
+    # in a printed vector of results it keeps its compact form, also when the cause cannot be displayed
+    @test sprint(show, SimFailed(1U, DomainError(-1.0, "neg"))) == "SimFailed(1U, DomainError(-1.0, \"neg\"))"
+    @test occursin("SimFailed(1U, DomainError(-1.0", sprint(show, MIME("text/plain"), [SimFailed(1U, DomainError(-1.0))]))
+    @test sprint(show, SimFailed(1U, DomainError(ExcUnprintable()))) == "SimFailed(1U, DomainError (cannot be displayed))"
+    @test occursin("(cannot be displayed)", sprint(show, MIME("text/plain"), [SimFailed(1U, DomainError(ExcUnprintable()))]))
 
     # a bug or an interrupt stops the simulation
     for err in (ArgumentError("damping bug"), InterruptException())

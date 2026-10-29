@@ -165,34 +165,42 @@ export dict2array, array2dict, dict2data, data2dict
 
 The result of a simulation that failed, for example a realization in
 [`stoch_simulate`](@ref). `info` is where it failed (usually the period, an
-`MIT`) and `cause` is the exception that made it fail, or `nothing`. It is
-displayed (and shown by `showerror`) as "Simulation failed in period ...",
-followed by the cause. `isfailed` returns `true` for a `SimFailed` whose `info`
-is not `nothing`.
+`MIT`) and `cause` is the exception that made it fail, or `nothing`. Displayed
+on its own (and by `showerror`) it reads "Simulation failed in period ...",
+followed by the cause; inside a printed collection it keeps the compact form
+`SimFailed(info, cause)`. `isfailed` returns `true` for a `SimFailed` whose
+`info` is not `nothing`.
 """
 struct SimFailed <: Exception
     info
     cause   # the exception that made the simulation fail, or `nothing`
 end
 SimFailed(info) = SimFailed(info, nothing)
+# the cause's own display (e.g. of a `DomainError` value) must not hide the failure
+function _render_cause(f, cause, context=nothing)
+    try
+        sprint(f, cause; context)
+    catch err
+        err isa InterruptException && rethrow()
+        "$(typeof(cause)) (cannot be displayed)"
+    end
+end
 function Base.showerror(io::IO, ex::SimFailed)
     isnothing(ex.info) ? print(io, "Simulation failed.") :
     ex.info isa MIT ? print(io, "Simulation failed in period $(ex.info).") :
     ex.info isa AbstractUnitRange{<:MIT} ? print(io, "Simulation over $(ex.info) failed.") :
     print(io, "Simulation failed: $(ex.info)")
-    if !isnothing(ex.cause)
-        # the cause's own display (e.g. of a `DomainError` value) must not hide the failure
-        cause = try
-            sprint(showerror, ex.cause)
-        catch err
-            err isa InterruptException && rethrow()
-            "$(typeof(ex.cause)) (cannot be displayed)"
-        end
-        print(io, "\nCaused by: ", cause)
-    end
+    isnothing(ex.cause) || print(io, "\nCaused by: ", _render_cause(showerror, ex.cause))
 end
 # `stoch_simulate` returns a `SimFailed` instead of throwing it, so it is mostly displayed
 Base.show(io::IO, ::MIME"text/plain", ex::SimFailed) = showerror(io, ex)
+# the compact form (e.g. in a printed vector of results), as the default `show`
+function Base.show(io::IO, ex::SimFailed)
+    show(io, typeof(ex))
+    print(io, "(")
+    show(io, ex.info)
+    print(io, ", ", _render_cause(show, ex.cause, io), ")")
+end
 isfailed(f::SimFailed)::Bool = !isnothing(f.info)
 isfailed(f::SimData)::Bool = false
 isfailed(f::Workspace)::Bool = false
