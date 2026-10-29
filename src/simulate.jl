@@ -142,10 +142,17 @@ equations (for example `log` of a negative number) at a trial point of the line
 search (`linesearch=true`, `damping=:armijo` or `:br81`) or at the first step of
 `:sim_lm` rejects that point, and the solver tries a shorter step. Anywhere
 else it propagates, as does any other exception from the equations. Two limits:
-when the line search reaches its minimum step size it accepts the step anyway,
-and a residual that evaluates to `NaN` is not detected as a failure. So, in a
-function used in your equations, throw a `DomainError` for arguments it cannot
-handle rather than returning `NaN`. See also [`stoch_simulate`](@ref).
+when the line search or the first `:sim_lm` step reaches its smallest step it
+accepts the step anyway, and a residual that evaluates to `NaN` (instead of
+throwing) is not detected as a failure. With `model.options.substitutions =
+true`, `log(expr)` in an equation is replaced by an auxiliary variable, so a
+negative `expr` does not throw a `DomainError`.
+
+In a function used in your equations, throw a `DomainError` for arguments it
+cannot handle rather than returning `NaN`, for example
+`f(x::Real) = x > 0 ? log(x) : throw(DomainError(x))`. Accept `Real`, not only
+`Float64`: derivatives are computed with ForwardDiff dual numbers. See also
+[`stoch_simulate`](@ref).
 
 """
 function simulate end

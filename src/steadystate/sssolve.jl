@@ -25,18 +25,33 @@ Specific options
 
 ### Exceptions from the model's equations
 Only a `DomainError` thrown while evaluating the equations (for example `log`
-or `sqrt` of a negative number) marks a point as inadmissible. At a trial
-point (the Newton line search, enabled with `nropts = Options(linesearch =
-true)`, and the first Levenberg-Marquardt step) the solver rejects such a point
-and tries a shorter step; in the presolve, an equation that cannot be evaluated
-at the starting point is left unsolved. Anywhere else, the solver stops with an
-"Inadmissible point" `ErrorException`. Any other exception from the equations
-propagates unchanged.
+or `sqrt` of a negative number) marks a point as inadmissible. Any other
+exception from the equations propagates unchanged.
+
+`sssolve!` needs a starting point (the values in `model.sstate`) at which every
+equation can be evaluated; otherwise it stops with an "Inadmissible point"
+`ErrorException`. After that it backs off from an inadmissible point only at
+trial points: the Newton line search (enabled with `nropts = Options(linesearch
+= true)`) and the first Levenberg-Marquardt step reject it and try a shorter
+step, and an update of the auxiliary variables that hits one is skipped.
+Anywhere else it stops with an "Inadmissible point" `ErrorException` (or
+"Singular gradient" when only a derivative is not finite). Two limits: when the
+line search rejects every step, the full Newton step is taken, and the point
+reached by the last iteration is returned without being evaluated, so check the
+result with [`check_sstate`](@ref).
+
+The presolve, run by [`clear_sstate!`](@ref) and [`initial_sstate!`](@ref),
+leaves an equation unsolved when it cannot be evaluated at the starting point.
+With `model.options.substitutions = true`, `log(expr)` in an equation is
+replaced by an auxiliary variable, so a negative `expr` does not throw a
+`DomainError`.
 
 If a function used in your equations cannot handle some arguments and you want
-the solver to back off, throw a `DomainError` for them (and keep the function
-working with ForwardDiff dual numbers). Do not return `NaN` instead, and do not
-turn every exception into a `DomainError`: that would hide errors in the model.
+the solver to back off, throw a `DomainError` for them, for example
+`f(x::Real) = x > 0 ? log(x) : throw(DomainError(x))`. Accept `Real`, not only
+`Float64`: derivatives are computed with ForwardDiff dual numbers. Do not return
+`NaN` instead, and do not turn every exception into a `DomainError`: that would
+hide errors in the model.
 """
 sssolve!(model::Model; kwargs...) = Base.invokelatest(_sssolve!, model; kwargs...)::Vector{Float64}
 function _sssolve!(model::Model;
