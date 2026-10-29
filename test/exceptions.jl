@@ -226,6 +226,10 @@ end
     # a cause that cannot be displayed does not hide the failure
     @test sprint(showerror, SimFailed(1U, DomainError(ExcUnprintable()))) ==
           "Simulation failed in period 1U.\nCaused by: DomainError (cannot be displayed)"
+    # displayed (as in the REPL) the same way, since stoch_simulate returns it, not throws it
+    @test sprint(show, MIME("text/plain"), r[1]) == sprint(showerror, r[1])
+    @test sprint(show, MIME("text/plain"), SimFailed(1U, DomainError(ExcUnprintable()))) ==
+          "Simulation failed in period 1U.\nCaused by: DomainError (cannot be displayed)"
 
     # a bug or an interrupt stops the simulation
     for err in (ArgumentError("damping bug"), InterruptException())

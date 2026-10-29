@@ -190,6 +190,8 @@ function Base.showerror(io::IO, ex::SimFailed)
         print(io, "\nCaused by: ", cause)
     end
 end
+# `stoch_simulate` returns a `SimFailed` instead of throwing it, so it is mostly displayed
+Base.show(io::IO, ::MIME"text/plain", ex::SimFailed) = showerror(io, ex)
 isfailed(f::SimFailed)::Bool = !isnothing(f.info)
 isfailed(f::SimData)::Bool = false
 isfailed(f::Workspace)::Bool = false
