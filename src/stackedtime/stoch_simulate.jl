@@ -135,6 +135,9 @@ function stoch_simulate(m::Model, p::Plan, baseline::SimData, shocks;
             catch err
                 _is_numerical_failure(err) || rethrow()
                 results[rkey] = SimFailed(t, err)
+                # a failed factorization may be left in the solver data, which the
+                # next realizations of this period would reuse
+                dₜ.J_factorized[] = nothing
                 continue
             end
             if !converged && warn_maxiter == :error

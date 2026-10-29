@@ -247,6 +247,32 @@ end
     r = @test_logs stoch_simulate(m, p, base, shk; maxiter=0, warn_maxiter=false)
     @test !isfailed(r[1])
 
+    # a failed factorization in one realization does not affect the next ones:
+    # the Jacobian of `(x - 1 + e)^2 = 1` at x = 0 is singular for e = 1, and that
+    # of e = 1 - 1e-9 is close to it, so the cached factorization would be reused
+    # (with UMFPACK the next realization then failed, with Pardiso it was wrong)
+    for fact in (:umfpack, :pardiso)
+        fact == :pardiso && Sys.isapple() && continue   # as in runtests.jl
+        m = Model()
+        m.options.factorization = fact
+        @variables m x
+        @shocks m e
+        @equations m begin
+            (x[t] - 1.0 + e[t])^2 + 0.0 * x[t-1] = 1.0
+        end
+        @initialize m
+        m.sstate.values .= 0.0
+        m.sstate.mask .= true
+        p = Plan(m, 1U:30U)
+        base = steadystatedata(m, p)
+        shock(v) = (s = MVTSeries(1U:1U, (:e,), zeros); s[1U, :e] = v; s)
+        alone = stoch_simulate(m, p, base, [shock(1.0 - 1e-9)])
+        r = @suppress_err stoch_simulate(m, p, base, [shock(0.1), shock(1.0), shock(1.0 - 1e-9)])
+        @test !isfailed(r[1])
+        @test r[2] isa SimFailed && StateSpaceEcon.StackedTimeSolver._is_numerical_failure(r[2].cause)
+        @test !isfailed(alone[1]) && !isfailed(r[3]) && r[3] ≈ alone[1]
+    end
+
     # Pardiso reports numerical and other failures with the same type
     STS = StateSpaceEcon.StackedTimeSolver
     @test STS._is_numerical_failure(DomainError(-1.0))
